@@ -1,13 +1,18 @@
-﻿$msODTDownloadUri="https://www.microsoft.com/en-us/download/details.aspx?id=49117"
-$fallbackConfig="config-fallback.xml"
+﻿$msODTDCUri = "https://www.microsoft.com/en-us/download/details.aspx?id=49117"
 
-function Find-ODTDownloadURL(){
-    try{
-        $msDownloadPage = Invoke-WebRequest -Uri $msODTDownloadUri
-        $msDownloadPage.Where
+function Get-ODTDownloadURL() {
+    [CmdletBinding()]
+    [OutputType([string])]
+    param ()
+    try {
+        $res = Invoke-WebRequest -UseBasicParsing -Uri $msODTDCUri -ErrorAction SilentlyContinue
     }
-    catch{
+    catch {
+        Throw "Error while connecting to Microsoft download center: $_"
+        Break
     }
-    finally{
+    finally {
+        $msODTDLUri = $res.links | Where-Object { $_.outerHTML -like "*click here to download manually*" }
+        Write-Output $msODTDLUri.href
     }
 }
